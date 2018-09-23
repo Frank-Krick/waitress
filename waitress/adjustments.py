@@ -87,6 +87,8 @@ class Adjustments(object):
         ('listen', aslist),
         ('threads', int),
         ('trusted_proxy', str),
+        ('trusted_proxy_count', int),
+        ('trusted_proxy_forwarded', asbool),
         ('url_scheme', str),
         ('url_prefix', slash_fixed_str),
         ('backlog', int),
@@ -123,6 +125,24 @@ class Adjustments(object):
 
     # Host allowed to overrid ``wsgi.url_scheme`` via header
     trusted_proxy = None
+
+    # How many proxies we trust when chained
+    #
+    # X-Forwarded-For: 192.0.2.1, "[2001:db8::1]"
+    #
+    # or
+    #
+    # Forwarded: for=192.0.2.1, For="[2001:db8::1]"
+    #
+    # means there were (potentially), two proxies involved. If we know there is
+    # only 1 valid proxy, then that initial IP address "192.0.2.1" is not
+    # trusted and we completely ignore it. If there are two trusted proxies in
+    # the path, this value can get set to a higher number
+    trusted_proxy_count = 1
+
+    # Should we use/trust the Forwarded header instead of the older
+    # X-Forwarded-{For,By,Host,Proto} headers
+    trusted_proxy_forwarded = False
 
     # default ``wsgi.url_scheme`` value
     url_scheme = 'http'
